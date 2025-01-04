@@ -5,11 +5,10 @@ within a Jupyter Notebook.
 inspired by: https://github.com/vinayak-mehta/ipychat
 """
 
-import types
 from IPython.core.magic import Magics, line_magic, magics_class
 from langchain_core.messages import AIMessage, HumanMessage, SystemMessage
 from oci_models import get_llm
-from context import get_context
+from context import filter_variables, get_context
 from prompts import PROMPT_ASK, PROMPT_ASK_CODE, PROMPT_ASK_DATA
 
 from config import (
@@ -98,16 +97,17 @@ class OCIGenaiMagics(Magics):
         """
         llm = get_llm()
 
+        # get the variables in session
         context = get_context(self.shell.user_ns, line)
-
+        # build input to the model
         messages = [
             SystemMessage(content=PROMPT_ASK_CODE),
             *self.history,
             HumanMessage(content=f"Context: {context}\n\n{line}"),
         ]
-
+        # invoke the model
         ai_response = llm.stream(messages)
-
+        # print in streaming mode
         all_text = self.print_stream(ai_response)
 
         # save in history input and output
@@ -146,15 +146,11 @@ class OCIGenaiMagics(Magics):
         """
         user_ns = self.shell.user_ns
 
+        variables_and_values = filter_variables(user_ns)
+
         print("User-defined variables in the current session:")
-        for name, value in user_ns.items():
-            # Exclude internal variables and modules
-            if not name.startswith("_") and not isinstance(value, types.ModuleType):
-                # Exclude IPython's In and Out history
-                if name not in ["In", "Out"]:
-                    # Exclude functions and other callables
-                    if not callable(value):
-                        print(f"* {name}: {value}")
+        for name, value in variables_and_values.items():
+            print(f"* {name}: {value}")
 
     @line_magic
     def show_model_config(self, line):

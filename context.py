@@ -5,7 +5,23 @@ from the user's namespace and provide detailed information about them.
 """
 
 import inspect
+import types
 from typing import Any, Dict
+
+
+def filter_variables(namespace: Dict[str, Any]):
+    """Filter the list of non-private variables in the current Jupyter Notebook session."""
+    variables_and_values = {}
+    for name, value in namespace.items():
+        # Exclude internal variables and modules
+        if not name.startswith("_") and not isinstance(value, types.ModuleType):
+            # Exclude IPython's In and Out history
+            if name not in ["In", "Out"]:
+                # Exclude functions and other callables
+                if not callable(value):
+                    variables_and_values[name] = value
+    # return a dict ({k:v})
+    return variables_and_values
 
 
 def extract_variables_from_query(line: str) -> set:
@@ -21,6 +37,7 @@ def extract_variables_from_query(line: str) -> set:
 
 def get_variable_info(name: str, value: Any) -> str:
     """Get detailed information about a variable."""
+    # TODO improve, remove functions, simplify
     info_parts = [f"Variable: {name}"]
     info_parts.append(f"Type: {type(value).__name__}")
 

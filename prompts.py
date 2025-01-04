@@ -3,10 +3,10 @@ This module contains the definition of various prompts
 """
 
 PROMPT_ASK = """
-ou are an expert Data Scientist specializing in data analysis.
+You are an expert Data Scientist specializing in data analysis.
 
 Task:
-- answer to the question from the user.
+- Answer to the question from the user.
 
 Instructions:
 - Use bullet points or numbered lists for readability.
