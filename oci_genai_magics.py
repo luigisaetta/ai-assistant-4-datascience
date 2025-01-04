@@ -8,40 +8,16 @@ inspired by: https://github.com/vinayak-mehta/ipychat
 import types
 from IPython.core.magic import Magics, line_magic, magics_class
 from langchain_core.messages import AIMessage, HumanMessage, SystemMessage
-from langchain_community.chat_models import ChatOCIGenAI
-from context import get_context_for_variables
+from oci_models import get_llm
+from context import get_context
 from prompts import PROMPT_ASK, PROMPT_ASK_CODE, PROMPT_ASK_DATA
 
 from config import (
     MODEL_ID,
-    AUTH,
     SERVICE_ENDPOINT,
     MAX_TOKENS,
     TEMPERATURE,
-    COMPARTMENT_ID,
 )
-
-
-def get_llm():
-    """
-    Initialize and return an instance of ChatOCIGenAI with the specified configuration.
-
-    Returns:
-        ChatOCIGenAI: An instance of the OCI GenAI language model.
-    """
-    llm = ChatOCIGenAI(
-        auth_type=AUTH,
-        model_id=MODEL_ID,
-        service_endpoint=SERVICE_ENDPOINT,
-        compartment_id=COMPARTMENT_ID,
-        is_stream=True,
-        model_kwargs={"temperature": TEMPERATURE, "max_tokens": MAX_TOKENS},
-    )
-    return llm
-
-
-# the list of messages
-history = []
 
 
 @magics_class
@@ -49,6 +25,14 @@ class OCIGenaiMagics(Magics):
     """
     A class to implement custom magic commands for interacting with an OCI GenAI model.
     """
+
+    def __init__(self, shell):
+        """
+        Initialize a new instance of MyClass.
+        """
+        super().__init__(shell)
+        # the list of messages
+        self.history = []
 
     def print_stream(self, _ai_response):
         """
@@ -77,9 +61,7 @@ class OCIGenaiMagics(Magics):
         Args:
             line (str): Additional arguments (unused).
         """
-        global history
-
-        history = []
+        self.history = []
         print("History cleared !")
 
     @line_magic
@@ -94,7 +76,7 @@ class OCIGenaiMagics(Magics):
 
         messages = [
             SystemMessage(content=PROMPT_ASK),
-            *history,
+            *self.history,
             HumanMessage(content=line),
         ]
 
@@ -103,8 +85,8 @@ class OCIGenaiMagics(Magics):
         all_text = self.print_stream(ai_response)
 
         # save in history input and output
-        history.append(HumanMessage(content=line))
-        history.append(AIMessage(content=all_text))
+        self.history.append(HumanMessage(content=line))
+        self.history.append(AIMessage(content=all_text))
 
     @line_magic
     def ask_code(self, line):
@@ -116,11 +98,11 @@ class OCIGenaiMagics(Magics):
         """
         llm = get_llm()
 
-        context = get_context_for_variables(self.shell.user_ns, line)
+        context = get_context(self.shell.user_ns, line)
 
         messages = [
             SystemMessage(content=PROMPT_ASK_CODE),
-            *history,
+            *self.history,
             HumanMessage(content=f"Context: {context}\n\n{line}"),
         ]
 
@@ -129,8 +111,8 @@ class OCIGenaiMagics(Magics):
         all_text = self.print_stream(ai_response)
 
         # save in history input and output
-        history.append(HumanMessage(content=line))
-        history.append(AIMessage(content=all_text))
+        self.history.append(HumanMessage(content=line))
+        self.history.append(AIMessage(content=all_text))
 
     @line_magic
     def ask_data(self, line):
@@ -142,7 +124,7 @@ class OCIGenaiMagics(Magics):
         """
         llm = get_llm()
 
-        context = get_context_for_variables(self.shell.user_ns, line)
+        context = get_context(self.shell.user_ns, line)
 
         # add the context
         messages = [
@@ -208,6 +190,6 @@ def load_ipython_extension(ipython):
     ]
     print("List of magic commands available:")
     for command in command_list:
-        print(command)
+        print(f"* {command}")
 
     ipython.register_magics(OCIGenaiMagics)

@@ -84,7 +84,7 @@ def get_variable_info(name: str, value: Any) -> str:
     return "\n".join(info_parts)
 
 
-def get_context_for_variables(namespace: Dict[str, Any], query: str) -> str:
+def get_context(namespace: Dict[str, Any], query: str) -> str:
     """Extract relevant context from the user's namespace based on the query."""
     # Filter namespace to only include actual variables (non-private)
     filtered_namespace = {k: v for k, v in namespace.items() if not k.startswith("_")}
