@@ -2,7 +2,8 @@
 This module implements magic commands for integrating an OCI GenAI model
 within a Jupyter Notebook.
 
-inspired by: https://github.com/vinayak-mehta/ipychat
+partially inspired by: 
+    https://github.com/vinayak-mehta/ipychat
 """
 
 from IPython.core.magic import Magics, line_magic, magics_class
@@ -52,6 +53,24 @@ class OCIGenaiMagics(Magics):
         # return the entire result to be stored in history
         return all_chunks
 
+    def handle_input(self, messages, last_request):
+        """
+        Handle the user input and send it to the AI model.
+
+        Args:
+            messages (list): A list of messages to send to the AI model.
+            line (str): The last user's input.
+        """
+        llm = get_llm()
+
+        ai_response = llm.stream(messages)
+
+        all_text = self.print_stream(ai_response)
+
+        # save in history input and output
+        self.history.append(HumanMessage(content=last_request))
+        self.history.append(AIMessage(content=all_text))
+
     @line_magic
     def clear_history(self, line):
         """
@@ -71,21 +90,14 @@ class OCIGenaiMagics(Magics):
         Args:
             line (str): The user's query.
         """
-        llm = get_llm()
-
         messages = [
             SystemMessage(content=PROMPT_ASK),
             *self.history,
             HumanMessage(content=line),
         ]
 
-        ai_response = llm.stream(messages)
-
-        all_text = self.print_stream(ai_response)
-
-        # save in history input and output
-        self.history.append(HumanMessage(content=line))
-        self.history.append(AIMessage(content=all_text))
+        # send the messages to the model and print the response
+        self.handle_input(messages, line)
 
     @line_magic
     def ask_code(self, line):
@@ -95,8 +107,6 @@ class OCIGenaiMagics(Magics):
         Args:
             line (str): The user's request for code.
         """
-        llm = get_llm()
-
         # get the variables in session
         context = get_context(self.shell.user_ns, line)
         # build input to the model
@@ -105,14 +115,8 @@ class OCIGenaiMagics(Magics):
             *self.history,
             HumanMessage(content=f"Context: {context}\n\n{line}"),
         ]
-        # invoke the model
-        ai_response = llm.stream(messages)
-        # print in streaming mode
-        all_text = self.print_stream(ai_response)
-
-        # save in history input and output
-        self.history.append(HumanMessage(content=line))
-        self.history.append(AIMessage(content=all_text))
+        # send the messages to the model and print the response
+        self.handle_input(messages, line)
 
     @line_magic
     def ask_data(self, line):
@@ -122,8 +126,6 @@ class OCIGenaiMagics(Magics):
         Args:
             line (str): The user's request for data analysis.
         """
-        llm = get_llm()
-
         context = get_context(self.shell.user_ns, line)
 
         # add the context
@@ -132,10 +134,8 @@ class OCIGenaiMagics(Magics):
             *self.history,
             HumanMessage(content=f"Context: {context}\n\n{line}"),
         ]
-
-        ai_response = llm.stream(messages)
-
-        self.print_stream(ai_response)
+        # send the messages to the model and print the response
+        self.handle_input(messages, line)
 
     @line_magic
     def show_variables(self, line):
