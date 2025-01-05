@@ -38,7 +38,7 @@ Put in the **config.py** file
 
 ## Generative AI customizations
 If you want to change the prompts used, they're in 
-(prompts.py)[https://github.com/luigisaetta/ai-assistant-4-datascience/blob/main/prompts.py]
+[prompts.py](https://github.com/luigisaetta/ai-assistant-4-datascience/blob/main/prompts.py)
 
 # Libraries used:
 * OCI Python SDK
@@ -56,5 +56,5 @@ There are several reasons why analysis from the LLM cannot be completely reliabl
 see:
 * MAX_ROWS_IN_SAMPLE in config
 
-The AI assistant can be a good **assistant* for example to suggest you Python code. Try it.
+The AI assistant can be a good **assistant** for example to suggest you Python code. Try it.
 
