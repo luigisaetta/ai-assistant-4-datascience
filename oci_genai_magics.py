@@ -129,6 +129,7 @@ class OCIGenaiMagics(Magics):
         # add the context
         messages = [
             SystemMessage(content=PROMPT_ASK_DATA),
+            *self.history,
             HumanMessage(content=f"Context: {context}\n\n{line}"),
         ]
 
