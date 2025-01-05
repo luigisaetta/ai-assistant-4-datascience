@@ -34,7 +34,7 @@ Put in the **config.py** file
 * MODEL_ID
 * type of OCI auth to use
 * service endpoint
-* OCID of your OCI compartments
+* OCID of your OCI compartment
 
 ## Generative AI customizations
 If you want to change the prompts used, they're in 
@@ -46,14 +46,15 @@ If you want to change the prompts used, they're in
 * Langchain-community
 
 ## Suggestions for Data Analysis
-The AI Assistant can give suggestions to improve data analysis, but you shouldn't rely only on these suggestions.
+The AI Assistant can give suggestions to improve Data Analysis, but you shouldn't rely only on these suggestions.
 **Always** check the results from the LLM.
 
 There are several reasons why analysis from the LLM cannot be completely reliable:
-1. LLM are not always good at computations.
-2. For big dataset, only a sample is passed in the context of the request to the LLM.
+1. Lack of Specialized Analytical Capabilities: LLMs are designed to process and generate human-like text but are not inherently equipped with the statistical and analytical tools necessary for complex data analysis. Traditional data analysis tools and statistical models are often more effective for tasks requiring specific analytical computations.
+2. Potential for Hallucinations and Inaccuracies: LLMs can produce outputs that appear plausible but are factually incorrect or nonsensical, a phenomenon known as "hallucination." This unreliability poses significant challenges when precise data analysis and accurate predictions are required. 
+3. Lack of Interpretability: LLMs operate as black boxes, providing little insight into how they arrive at specific outputs. In data analysis, understanding the rationale behind predictions is crucial for validation and decision-making, a transparency that LLMs do not inherently offer.
 
-see:
+In additiion, for big dataset only a sample is passed in the context of the request to the LLM. See:
 * MAX_ROWS_IN_SAMPLE in config
 
 The AI assistant can be a good **assistant** for example to suggest you Python code. Try it.
