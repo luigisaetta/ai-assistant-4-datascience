@@ -13,10 +13,17 @@ then:
 * %ask_code
 * %ask_data
 
-## Configuration
+## Setup and Configuration
 Configure security: for example, create a key-pair and put in $HOME/.oci
 
-Setup in OCI policies to enable access to OCI Generative AI
+Setup in OCI **policies** to enable access to OCI Generative AI
+
+If you want to run locally, create a conda environment
+```
+conda create -n ai-assistant-env python==3.11
+
+pip install -r requirements.txt
+```
 
 Put in the **config.py** file
 * MODEL_ID
