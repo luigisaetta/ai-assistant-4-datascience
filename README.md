@@ -37,9 +37,24 @@ Put in the **config.py** file
 * OCID of your OCI compartments
 
 ## Generative AI customizations
-If you want to change the prompts used, they're in **prompts.py**
+If you want to change the prompts used, they're in 
+(prompts.py)[https://github.com/luigisaetta/ai-assistant-4-datascience/blob/main/prompts.py]
 
 # Libraries used:
 * OCI Python SDK
 * Langchain
 * Langchain-community
+
+## Suggestions for Data Analysis
+The AI Assistant can give suggestions to improve data analysis, but you shouldn't rely only on these suggestions.
+**Always** check the results from the LLM.
+
+There are several reasons why analysis from the LLM cannot be completely reliable:
+1. LLM are not always good at computations.
+2. For big dataset, only a sample is passed in the context of the request to the LLM.
+
+see:
+* MAX_ROWS_IN_SAMPLE in config
+
+The AI assistant can be a good **assistant* for example to suggest you Python code. Try it.
+
