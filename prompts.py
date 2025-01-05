@@ -10,6 +10,7 @@ Task:
 
 Instructions:
 - Use bullet points or numbered lists for readability.
+- If you don't have enough information, ask clarifying questions.
 """
 
 PROMPT_ASK_DATA = """

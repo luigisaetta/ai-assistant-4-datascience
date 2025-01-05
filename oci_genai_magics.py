@@ -6,8 +6,10 @@ partially inspired by:
     https://github.com/vinayak-mehta/ipychat
 """
 
+import logging
 from IPython.core.magic import Magics, line_magic, magics_class
 from langchain_core.messages import AIMessage, HumanMessage, SystemMessage
+
 from oci_models import get_llm
 from context import filter_variables, get_context
 from prompts import PROMPT_ASK, PROMPT_ASK_CODE, PROMPT_ASK_DATA
@@ -18,6 +20,9 @@ from config import (
     MAX_TOKENS,
     TEMPERATURE,
 )
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 
 @magics_class
@@ -55,11 +60,14 @@ class OCIGenaiMagics(Magics):
 
     def handle_input(self, messages, last_request):
         """
-        Handle the user input and send it to the AI model.
+        Process user input and send it to the AI model.
 
         Args:
-            messages (list): A list of messages to send to the AI model.
-            line (str): The last user's input.
+            messages (list): A list of message objects to send to the AI model.
+            last_request (str): The user's latest input.
+
+        Returns:
+            None
         """
         llm = get_llm()
 
@@ -80,7 +88,7 @@ class OCIGenaiMagics(Magics):
             line (str): Additional arguments (unused).
         """
         self.history = []
-        print("History cleared !")
+        logger.info("History cleared !")
 
     @line_magic
     def ask(self, line):
@@ -97,6 +105,7 @@ class OCIGenaiMagics(Magics):
         ]
 
         # send the messages to the model and print the response
+        # we send separately line to save in history user request
         self.handle_input(messages, line)
 
     @line_magic
@@ -151,7 +160,7 @@ class OCIGenaiMagics(Magics):
 
         print("User-defined variables in the current session:")
         for name, value in variables_and_values.items():
-            print(f"* {name}: {value}")
+            print(f"* {name} (type: {type(value).__name__}): {value}")
 
     @line_magic
     def show_model_config(self, line):

@@ -1,7 +1,7 @@
 """
-This module implements functions to manage the context.
-For example, to retrieve the value of variables 
-from the user's namespace and provide detailed information about them.
+This module provides functions to manage the context within a Jupyter Notebook.
+It includes utilities to retrieve user-defined variables from the user's namespace
+and provide detailed information about them.
 """
 
 import types
@@ -9,7 +9,23 @@ from typing import Any, Dict
 
 
 def filter_variables(namespace: Dict[str, Any]):
-    """Filter the list of non-private variables in the current Jupyter Notebook session."""
+    """
+    Filter and return a dictionary of user-defined, 
+    non-private variables from the provided namespace.
+
+    Args:
+        namespace (Dict[str, Any]): The namespace dictionary 
+        containing variable names and their corresponding values.
+
+    Returns:
+        Dict[str, Any]: A dictionary containing variable names and values that are user-defined,
+        non-private, not modules, not IPython's input/output history, and not callable objects.
+
+    Example:
+        >>> user_ns = {'_private_var': 1, 'public_var': 2, 'In': [], 'Out': {}, 'func': lambda x: x}
+        >>> filter_variables(user_ns)
+        {'public_var': 2}
+    """
     variables_and_values = {}
     for name, value in namespace.items():
         # Exclude internal variables and modules
@@ -24,7 +40,20 @@ def filter_variables(namespace: Dict[str, Any]):
 
 
 def extract_variables_from_query(line: str) -> set:
-    """Extract potential variable names from the query string."""
+    """
+    Extract and return a set of potential variable names from the given query string.
+
+    Args:
+        line (str): The input query string from which to extract variable names.
+
+    Returns:
+        Set[str]: A set of unique strings that are valid Python identifiers,
+        representing potential variable names.
+
+    Example:
+        >>> extract_variables_from_query("Analyze the data in df and plot the results.")
+        {'df'}
+    """
     variables = set()
 
     for word in line.split():
@@ -35,8 +64,34 @@ def extract_variables_from_query(line: str) -> set:
 
 
 def get_variable_info(name: str, value: Any) -> str:
-    """Get detailed information about a variable."""
-    # TODO improve, remove functions, simplify
+    """
+    Generate and return a detailed string representation of a variable's information.
+
+    Args:
+        name (str): The name of the variable.
+        value (Any): The value of the variable.
+
+    Returns:
+        str: A formatted string containing the variable's name, type, and additional details
+        such as shape and columns for DataFrames, attributes for objects,
+        or length and sample content for containers.
+
+    Example:
+        >>> import pandas as pd
+        >>> df = pd.DataFrame({'A': [1, 2], 'B': [3, 4]})
+        >>> print(get_variable_info('df', df))
+        Variable: df
+        Type: DataFrame
+        Shape: (2, 2)
+        Columns:
+        - A (int64)
+        - B (int64)
+        Sample (first 5 rows):
+           A  B
+        0  1  3
+        1  2  4
+    """
+    # TODO simplify
     info_parts = [f"Variable: {name}"]
     info_parts.append(f"Type: {type(value).__name__}")
 
@@ -74,13 +129,34 @@ def get_variable_info(name: str, value: Any) -> str:
 
 def get_context(user_ns: Dict[str, Any], line: str) -> str:
     """
-    Extract relevant context from the user's namespace based on the query.
+    Extract and return relevant context from the user's namespace 
+    based on the variables mentioned in the query line.
 
-    input:
-        user_ns: Dict[str, Any]
-        line: the line input to magic command
+    Args:
+        user_ns (Dict[str, Any]): The user's namespace containing variable names 
+            and their corresponding values.
+        line (str): The input query string potentially referencing variables 
+            in the namespace.
+
+    Returns:
+        str: A formatted string containing detailed information about the variables 
+            referenced in the query line.
+
+    Example:
+        >>> user_ns = {'df': pd.DataFrame({'A': [1, 2]})}
+        >>> line = "Show the summary of df"
+        >>> print(get_context(user_ns, line))
+        Variable: df
+        Type: DataFrame
+        Shape: (2, 1)
+        Columns:
+        - A (int64)
+        Sample (first 5 rows):
+           A
+        0  1
+        1  2
     """
-    # Filter namespace to only include actual variables (non-private)
+    # include only non-private variables
     filtered_ns = filter_variables(user_ns)
 
     user_vars = extract_variables_from_query(line)
