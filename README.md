@@ -12,3 +12,18 @@ then:
 * %ask
 * %ask_code
 * %ask_data
+
+## Configuration
+Configure security: for example, create a key-pair and put in $HOME/.oci
+
+Setup in OCI policies to enable access to OCI Generative AI
+
+Put in the **config.py** file
+* MODEL_ID
+* type of OCI auth to use
+* service endpoint
+* OCID of your OCI compartments
+
+## Generative AI customizations
+If you want to change the prompts used, they're in **prompts.py**
+
