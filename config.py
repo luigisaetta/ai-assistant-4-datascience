@@ -13,3 +13,9 @@ MAX_TOKENS = 1024
 
 # OCI general
 COMPARTMENT_ID = "ocid1.compartment.oc1..aaaaaaaaushuwb2evpuf7rcpl4r7ugmqoe7ekmaiik3ra3m7gec3d234eknq"
+
+# history management
+MAX_MSGS_IN_HISTORY = 10
+# context.py
+# Maximum number of rows to display in a sample
+MAX_ROWS_IN_SAMPLE = 500

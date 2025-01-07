@@ -19,6 +19,7 @@ from config import (
     SERVICE_ENDPOINT,
     MAX_TOKENS,
     TEMPERATURE,
+    MAX_MSGS_IN_HISTORY,
 )
 
 logging.basicConfig(level=logging.INFO)
@@ -100,7 +101,7 @@ class OCIGenaiMagics(Magics):
         """
         messages = [
             SystemMessage(content=PROMPT_ASK),
-            *self.history,
+            *self.history[-MAX_MSGS_IN_HISTORY:],
             HumanMessage(content=line),
         ]
 
@@ -121,7 +122,7 @@ class OCIGenaiMagics(Magics):
         # build input to the model
         messages = [
             SystemMessage(content=PROMPT_ASK_CODE),
-            *self.history,
+            *self.history[-MAX_MSGS_IN_HISTORY:],
             HumanMessage(content=f"Context: {context}\n\n{line}"),
         ]
         # send the messages to the model and print the response
@@ -140,7 +141,7 @@ class OCIGenaiMagics(Magics):
         # add the context
         messages = [
             SystemMessage(content=PROMPT_ASK_DATA),
-            *self.history,
+            *self.history[-MAX_MSGS_IN_HISTORY:],
             HumanMessage(content=f"Context: {context}\n\n{line}"),
         ]
         # send the messages to the model and print the response

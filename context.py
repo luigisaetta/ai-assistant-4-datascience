@@ -6,15 +6,16 @@ and provide detailed information about them.
 
 import types
 from typing import Any, Dict
+from config import MAX_ROWS_IN_SAMPLE
 
 
 def filter_variables(namespace: Dict[str, Any]):
     """
-    Filter and return a dictionary of user-defined, 
+    Filter and return a dictionary of user-defined,
     non-private variables from the provided namespace.
 
     Args:
-        namespace (Dict[str, Any]): The namespace dictionary 
+        namespace (Dict[str, Any]): The namespace dictionary
         containing variable names and their corresponding values.
 
     Returns:
@@ -101,8 +102,13 @@ def get_variable_info(name: str, value: Any) -> str:
         info_parts.append("Columns:")
         for col in value.columns:
             info_parts.append(f"- {col} ({value[col].dtype})")
-        info_parts.append("\nSample (first 5 rows):")
-        info_parts.append(str(value.head()))
+        info_parts.append(f"\nSample (max {MAX_ROWS_IN_SAMPLE} rows):")
+
+        if len(value) > MAX_ROWS_IN_SAMPLE:
+            # does a random sampling
+            value = value.sample(n=MAX_ROWS_IN_SAMPLE, random_state=42)
+
+        info_parts.append(str(value))
 
     # objects
     elif hasattr(value, "__dict__"):
@@ -129,17 +135,17 @@ def get_variable_info(name: str, value: Any) -> str:
 
 def get_context(user_ns: Dict[str, Any], line: str) -> str:
     """
-    Extract and return relevant context from the user's namespace 
+    Extract and return relevant context from the user's namespace
     based on the variables mentioned in the query line.
 
     Args:
-        user_ns (Dict[str, Any]): The user's namespace containing variable names 
+        user_ns (Dict[str, Any]): The user's namespace containing variable names
             and their corresponding values.
-        line (str): The input query string potentially referencing variables 
+        line (str): The input query string potentially referencing variables
             in the namespace.
 
     Returns:
-        str: A formatted string containing detailed information about the variables 
+        str: A formatted string containing detailed information about the variables
             referenced in the query line.
 
     Example:
@@ -164,7 +170,7 @@ def get_context(user_ns: Dict[str, Any], line: str) -> str:
 
     for var_name in user_vars:
         if var_name in filtered_ns:
-            var = filtered_ns[var_name]
-            context_parts.append(get_variable_info(var_name, var))
+            var_value = filtered_ns[var_name]
+            context_parts.append(get_variable_info(var_name, var_value))
 
     return "\n".join(context_parts)
