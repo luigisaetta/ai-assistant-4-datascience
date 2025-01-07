@@ -38,6 +38,7 @@ Put in the **config.py** file
 
 ## Setup in OCI Data Science
 Create a NB session, 2 ECPU is OK.
+
 Install a conda environment with Python 3.11 and activate it
 
 ```
