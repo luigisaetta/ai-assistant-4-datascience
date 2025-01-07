@@ -1,6 +1,8 @@
 # AI Assistant for Data Science
 This repository contains the code to develop a prototype of an AI Assistant integrated in a Jupyter Notebook
 
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+
 ## Features
 * You can make a generic question to the LLM
 * You can ask to analyze, for example, a dataframe loaded
@@ -51,6 +53,7 @@ Install additional Libraries
 pip install oci -U
 pip install langchain -U
 pip install langchain-community -U
+pip install tiktoken
 ```
 
 clone the repository

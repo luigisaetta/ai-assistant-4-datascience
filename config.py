@@ -19,3 +19,6 @@ MAX_MSGS_IN_HISTORY = 10
 # context.py
 # Maximum number of rows to display in a sample
 MAX_ROWS_IN_SAMPLE = 500
+
+# compute tokens
+TOKENIZER = "cl100k_base"

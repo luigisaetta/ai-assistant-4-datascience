@@ -7,8 +7,10 @@ partially inspired by:
 """
 
 import logging
+from time import time
 from IPython.core.magic import Magics, line_magic, magics_class
 from langchain_core.messages import AIMessage, HumanMessage, SystemMessage
+import tiktoken
 
 from oci_models import get_llm
 from context import filter_variables, get_context
@@ -20,6 +22,7 @@ from config import (
     MAX_TOKENS,
     TEMPERATURE,
     MAX_MSGS_IN_HISTORY,
+    TOKENIZER,
 )
 
 logging.basicConfig(level=logging.INFO)
@@ -34,11 +37,41 @@ class OCIGenaiMagics(Magics):
 
     def __init__(self, shell):
         """
-        Initialize a new instance of MyClass.
+        Initialize a new instance of OCIGenaiMagics.
         """
         super().__init__(shell)
+
+        # the tokenizer
+        self.encoding = tiktoken.get_encoding(TOKENIZER)
+
         # the list of messages
         self.history = []
+        # to compute tokens for input + output
+        self.tokens_input = 0
+        self.tokens_output = 0
+        # to compute genai resp.time
+        self.genai_requests = 0
+        self.genai_total_time = 0
+
+    def compute_tokens(self, messages):
+        """
+        Compute the #of tokens for the messages.
+        """
+        total_tokens = 0
+        for message in messages:
+            # Estrarre il content dal messaggio, gestendo i diversi tipi di messaggi
+            if hasattr(message, "content"):
+                content = message.content  # SystemMessage, HumanMessage, AIMessage
+            else:
+                content = str(message)
+
+            if content is None:
+                content = ""
+
+            tokens = self.encoding.encode(content)
+            total_tokens += len(tokens)
+
+        return total_tokens
 
     def print_stream(self, _ai_response):
         """
@@ -72,6 +105,8 @@ class OCIGenaiMagics(Magics):
         """
         llm = get_llm()
 
+        time_start = time()
+
         ai_response = llm.stream(messages)
 
         all_text = self.print_stream(ai_response)
@@ -79,6 +114,12 @@ class OCIGenaiMagics(Magics):
         # save in history input and output
         self.history.append(HumanMessage(content=last_request))
         self.history.append(AIMessage(content=all_text))
+
+        # update stats
+        self.genai_requests += 1
+        self.genai_total_time += time() - time_start
+        self.tokens_input += self.compute_tokens(messages)
+        self.tokens_output += self.compute_tokens([AIMessage(content=all_text)])
 
     @line_magic
     def clear_history(self, line):
@@ -177,6 +218,22 @@ class OCIGenaiMagics(Magics):
         print("* Temperature: ", TEMPERATURE)
         print("* Max_tokens: ", MAX_TOKENS)
 
+    @line_magic
+    def genai_performance(self, line):
+        """
+        Display the current OCI model performance.
+
+        Args:
+            line (str): Additional arguments (unused).
+        """
+        print("Performance metrics:")
+        print("* Total requests: ", self.genai_requests)
+        print("* Total input tokens: ", self.tokens_input)
+        print("* Total output tokens: ", self.tokens_output)
+        print(
+            "* Avg time (sec.): ", round(self.genai_total_time / self.genai_requests, 1)
+        )
+
 
 def load_ipython_extension(ipython):
     """
@@ -194,6 +251,7 @@ def load_ipython_extension(ipython):
         "clear_history",
         "show_variables",
         "show_model_config",
+        "genai_performance",
     ]
     print("List of magic commands available:")
     for command in command_list:
