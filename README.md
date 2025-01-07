@@ -21,7 +21,7 @@ then:
 ## Setup and Configuration
 Configure security: for example, create a key-pair and put in $HOME/.oci
 
-Setup in OCI **policies** to enable access to OCI Generative AI
+Setup OCI **policies** to enable access to OCI Generative AI
 
 If you want to run locally, create a conda environment
 ```
@@ -32,9 +32,30 @@ pip install -r requirements.txt
 
 Put in the **config.py** file
 * MODEL_ID
-* type of OCI auth to use
-* service endpoint
+* Type of OCI auth to use
+* Service endpoint
 * OCID of your OCI compartment
+
+## Setup in OCI Data Science
+Create a NB session, 2 ECPU is OK.
+Install a conda environment with Python 3.11 and activate it
+
+```
+odsc conda install -s generalml_p311_cpu_x86_64_v1
+conda activate /home/datascience/conda/generalml_p311_cpu_x86_64_v1
+```
+
+Install additional Libraries
+```
+pip install oci -U
+pip install langchain -U
+pip install langchain-community -U
+```
+
+clone the repository
+```
+git clone https://github.com/luigisaetta/ai-assistant-4-datascience.git
+```
 
 ## Generative AI customizations
 If you want to change the prompts used, they're in 
@@ -54,8 +75,8 @@ There are several reasons why analysis from the LLM cannot be completely reliabl
 2. Potential for Hallucinations and Inaccuracies: LLMs can produce outputs that appear plausible but are factually incorrect or nonsensical, a phenomenon known as "hallucination." This unreliability poses significant challenges when precise data analysis and accurate predictions are required. 
 3. Lack of Interpretability: LLMs operate as black boxes, providing little insight into how they arrive at specific outputs. In data analysis, understanding the rationale behind predictions is crucial for validation and decision-making, a transparency that LLMs do not inherently offer.
 
-In additiion, for big dataset only a sample is passed in the context of the request to the LLM. See:
+In addition, for big datasets only a sample is passed in the context of the request to the LLM. See:
 * MAX_ROWS_IN_SAMPLE in config
 
-The AI assistant can be a good **assistant** for example to suggest you Python code. Try it.
+The AI assistant can be a good **assistant** for example to suggest you **Python code**. Try it!
 
