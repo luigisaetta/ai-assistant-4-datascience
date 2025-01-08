@@ -234,7 +234,7 @@ class OCIGenaiMagics(Magics):
         print("* Max_tokens: ", MAX_TOKENS)
 
     @line_magic
-    def genai_performance(self, line):
+    def genai_stats(self, line):
         """
         Display the current OCI model performance.
 
