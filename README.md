@@ -84,3 +84,8 @@ In addition, for big datasets only a sample is passed in the context of the requ
 
 The AI assistant can be a good **assistant** for example to suggest you **Python code**. Try it!
 
+## Next steps
+There is an official integration for Generative AI models in Jupyter: [jupyter-ai](https://github.com/jupyterlab/jupyter-ai)
+
+I' working on developing an integration with jupyter-ai, stay tuned and... let me know if you're interested.
+
