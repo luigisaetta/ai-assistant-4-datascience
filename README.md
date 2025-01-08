@@ -1,15 +1,15 @@
 # AI Assistant for Data Science
-This repository contains the code to develop a prototype of an AI Assistant integrated in a Jupyter Notebook
+This repository contains the code for an AI Assistant integrated in a Jupyter Notebook
 
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
 ## Features
 * You can make a generic question to the LLM
-* You can ask to analyze, for example, a dataframe loaded
+* You can ask to analyze, for example, a dataset/dataframe loaded
 * You can ask for the code to make some processing, for example to train a ML model
 
 ## Usage
-It can be plugged by simply loading an IPython extension
+It can be plugged-in by simply loading an IPython extension
 
 ```
 %load_ext oci_genai_magics
