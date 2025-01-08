@@ -42,7 +42,7 @@ class OCIGenaiMagics(Magics):
         super().__init__(shell)
 
         # the tokenizer
-        self.encoding = tiktoken.get_encoding(TOKENIZER)
+        self.tokenizer = tiktoken.get_encoding(TOKENIZER)
 
         # the list of messages
         self.history = []
@@ -68,7 +68,7 @@ class OCIGenaiMagics(Magics):
             if content is None:
                 content = ""
 
-            tokens = self.encoding.encode(content)
+            tokens = self.tokenizer.encode(content)
             total_tokens += len(tokens)
 
         return total_tokens
@@ -111,15 +111,15 @@ class OCIGenaiMagics(Magics):
 
         all_text = self.print_stream(ai_response)
 
-        # save in history input and output
-        self.history.append(HumanMessage(content=last_request))
-        self.history.append(AIMessage(content=all_text))
-
         # update stats
         self.genai_requests += 1
         self.genai_total_time += time() - time_start
         self.tokens_input += self.compute_tokens(messages)
         self.tokens_output += self.compute_tokens([AIMessage(content=all_text)])
+
+        # save in history input and output
+        self.history.append(HumanMessage(content=last_request))
+        self.history.append(AIMessage(content=all_text))
 
     @line_magic
     def clear_history(self, line):
@@ -131,6 +131,21 @@ class OCIGenaiMagics(Magics):
         """
         self.history = []
         logger.info("History cleared !")
+
+    @line_magic
+    def clear_stats(self, line):
+        """
+        Clear the genai stats.
+
+        Args:
+            line (str): Additional arguments (unused).
+        """
+        self.tokens_input = 0
+        self.tokens_output = 0
+        # to compute genai resp.time
+        self.genai_requests = 0
+        self.genai_total_time = 0
+        logger.info("Stats cleared !")
 
     @line_magic
     def ask(self, line):
@@ -251,7 +266,8 @@ def load_ipython_extension(ipython):
         "clear_history",
         "show_variables",
         "show_model_config",
-        "genai_performance",
+        "genai_stats",
+        "clear_stats",
     ]
     print("List of magic commands available:")
     for command in command_list:
