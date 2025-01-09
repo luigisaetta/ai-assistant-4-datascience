@@ -20,6 +20,8 @@ then:
 * %ask_data: ask to analyze a dataset loaded in the NB 
 * %ask_code: ask to generate python code to analyze or process data
 
+an example notebook is [here](https://github.com/luigisaetta/ai-assistant-4-datascience/blob/main/test_ask.ipynb)
+
 ## Setup and Configuration
 Configure security: for example, create a key-pair and put in $HOME/.oci
 
@@ -87,5 +89,5 @@ The AI assistant can be a good **assistant** for example to suggest you **Python
 ## Next steps
 There is an official integration for Generative AI models in Jupyter: [jupyter-ai](https://github.com/jupyterlab/jupyter-ai)
 
-I' working on developing an integration with jupyter-ai, stay tuned and... let me know if you're interested.
+I'm working on developing an integration with jupyter-ai, stay tuned and... let me know if you're interested.
 
