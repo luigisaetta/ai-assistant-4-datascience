@@ -16,7 +16,7 @@ import tiktoken
 
 from oci_models import get_llm
 from context import filter_variables, get_context
-from code_parser_utils import remove_triple_backtics
+from code_parser_utils import remove_triple_backtics, add_header
 from prompts import PROMPT_ASK, PROMPT_ASK_CODE, PROMPT_ASK_DATA
 
 from config import (
@@ -30,6 +30,10 @@ from config import (
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+
+# to disable some loggging
+oci_circuit_breaker_logger = logging.getLogger("oci.circuit_breaker")
+oci_circuit_breaker_logger.setLevel(logging.WARNING)
 
 
 @magics_class
@@ -57,10 +61,27 @@ class OCIGenaiMagics(Magics):
         self.genai_total_time = 0
 
     def get_cell_manager(self):
-        # Recuperiamo l'istanza di Jupyter e il gestore delle celle
+        """
+        Get the current Jupyter Notebook cell manager,
+        to dynamically update the notebook and add new cells.
+        """
         ipython = get_ipython()
         shell = ipython.kernel.shell
         return shell
+
+    def update_stats(self, _elapsed, _messages, _last_text):
+        """
+        Update the statistics for the current session.
+
+        Args:
+
+            _messages (list): A list of message objects.
+            _last_text: The last text message.
+        """
+        self.genai_requests += 1
+        self.genai_total_time += _elapsed
+        self.tokens_input += self.compute_tokens(_messages)
+        self.tokens_output += self.compute_tokens([AIMessage(content=_last_text)])
 
     def compute_tokens(self, messages):
         """
@@ -127,10 +148,7 @@ class OCIGenaiMagics(Magics):
         all_text = self.print_stream(ai_response)
 
         # update stats
-        self.genai_requests += 1
-        self.genai_total_time += time() - time_start
-        self.tokens_input += self.compute_tokens(messages)
-        self.tokens_output += self.compute_tokens([AIMessage(content=all_text)])
+        self.update_stats((time() - time_start), messages, all_text)
 
         # save in history input and output
         self.history.append(HumanMessage(content=last_request))
@@ -148,21 +166,16 @@ class OCIGenaiMagics(Magics):
 
         ai_response = llm.invoke(messages)
 
-        _code = remove_triple_backtics(ai_response.content)
+        _code = add_header(remove_triple_backtics(ai_response.content))
 
         # to create a new cell with the code generated
         shell = self.get_cell_manager()
         shell.set_next_input(_code, replace=False)
 
         # update stats
-        self.genai_requests += 1
-        self.genai_total_time += time() - time_start
-        self.tokens_input += self.compute_tokens(messages)
-        self.tokens_output += self.compute_tokens(
-            [AIMessage(content=ai_response.content)]
-        )
+        self.update_stats((time() - time_start), messages, ai_response.content)
 
-        # Salva nella cronologia
+        # Save in history input and output
         self.history.append(HumanMessage(content=last_request))
         self.history.append(AIMessage(content=_code))
 
@@ -314,12 +327,12 @@ def load_ipython_extension(ipython):
     print("OCIGenaiMagics extension loaded...")
 
     command_list = [
-        "ask",
-        "ask_code",
-        "ask_data",
-        "clear_history",
-        "show_variables",
         "show_model_config",
+        "ask",
+        "ask_data",
+        "ask_code",
+        "show_variables",
+        "clear_history",
         "genai_stats",
         "clear_stats",
     ]

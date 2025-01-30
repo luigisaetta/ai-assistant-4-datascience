@@ -40,11 +40,6 @@ Provide only the analysis results in your response.
 
 """
 
-SAVE_HERE = """
-- DO NOT enclose the code in triple backticks. Provide only the code.
-- DO NOT start with ```python or end with ```.
-"""
-
 PROMPT_ASK_CODE = """
 You are an expert Data Scientist proficient in Python programming.
 
