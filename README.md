@@ -17,8 +17,8 @@ It can be plugged-in by simply loading an IPython extension
 
 then:
 * %ask: make a question to the LLM
-* %ask_data: ask to analyze a dataset loaded in the NB 
-* %ask_code: ask to generate python code to analyze or process data
+* %%ask_data: ask to analyze a dataset loaded in the NB 
+* %%ask_code: ask to generate python code to analyze or process data
 
 an example notebook is [here](https://github.com/luigisaetta/ai-assistant-4-datascience/blob/main/test_ask.ipynb)
 
@@ -87,7 +87,5 @@ In addition, for big datasets only a sample is passed in the context of the requ
 The AI assistant can be a good **assistant** for example to suggest you **Python code**. Try it!
 
 ## Next steps
-There is an official integration for Generative AI models in Jupyter: [jupyter-ai](https://github.com/jupyterlab/jupyter-ai)
-
-I'm working on developing an integration with jupyter-ai, stay tuned and... let me know if you're interested.
+...
 
