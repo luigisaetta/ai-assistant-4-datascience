@@ -97,16 +97,16 @@ def get_variable_info(name: str, value: Any) -> str:
     info_parts.append(f"Type: {type(value).__name__}")
 
     # dataframes
-    if "pandas.core.frame.DataFrame" in str(type(value)):
+    if "DataFrame" in str(type(value)):
+        if len(value) > MAX_ROWS_IN_SAMPLE:
+            # does a random sampling
+            value = value.sample(n=MAX_ROWS_IN_SAMPLE, random_state=42)
+
         info_parts.append(f"Shape: {value.shape}")
         info_parts.append("Columns:")
         for col in value.columns:
             info_parts.append(f"- {col} ({value[col].dtype})")
         info_parts.append(f"\nSample (max {MAX_ROWS_IN_SAMPLE} rows):")
-
-        if len(value) > MAX_ROWS_IN_SAMPLE:
-            # does a random sampling
-            value = value.sample(n=MAX_ROWS_IN_SAMPLE, random_state=42)
 
         info_parts.append(str(value))
 
@@ -170,6 +170,8 @@ def get_context(user_ns: Dict[str, Any], line: str) -> str:
 
     for var_name in user_vars:
         if var_name in filtered_ns:
+            # print("Adding: ", var_name)
+
             var_value = filtered_ns[var_name]
             context_parts.append(get_variable_info(var_name, var_value))
 

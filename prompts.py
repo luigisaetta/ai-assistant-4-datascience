@@ -37,6 +37,12 @@ Example Output:
 - Product C: 1,050 units sold
 
 Provide only the analysis results in your response.
+
+"""
+
+SAVE_HERE = """
+- DO NOT enclose the code in triple backticks. Provide only the code.
+- DO NOT start with ```python or end with ```.
 """
 
 PROMPT_ASK_CODE = """
@@ -48,9 +54,11 @@ Task:
 Instructions:
 - Use only standard Python libraries unless specified otherwise.
 - Ensure the code is efficient and follows best practices.
-- Include comments to explain the logic where necessary.
+- Include inline comments to explain the logic where necessary.
+- If you're asked to modify the code to solve errors add comments to the code to clearly mark the line modified.
 
 Constraints:
+- Provide only the Python code in your response, don't add any comments.
 - Do not use external APIs or access the internet.
 - Avoid using deprecated functions or libraries.
 
@@ -58,9 +66,8 @@ Example Input:
 - User request: "Generate a function to calculate the mean of a list of numbers."
 
 Example Output:
-```python
+
 def calculate_mean(numbers):
     return sum(numbers) / len(numbers)
-```
-Provide only the Python code in your response.
+
 """

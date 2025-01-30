@@ -8,12 +8,15 @@ partially inspired by:
 
 import logging
 from time import time
-from IPython.core.magic import Magics, line_magic, magics_class
+from IPython.core.magic import Magics, line_magic, cell_magic, magics_class
+from IPython import get_ipython
+from IPython.display import display, Markdown
 from langchain_core.messages import AIMessage, HumanMessage, SystemMessage
 import tiktoken
 
 from oci_models import get_llm
 from context import filter_variables, get_context
+from code_parser_utils import remove_triple_backtics
 from prompts import PROMPT_ASK, PROMPT_ASK_CODE, PROMPT_ASK_DATA
 
 from config import (
@@ -53,6 +56,12 @@ class OCIGenaiMagics(Magics):
         self.genai_requests = 0
         self.genai_total_time = 0
 
+    def get_cell_manager(self):
+        # Recuperiamo l'istanza di Jupyter e il gestore delle celle
+        ipython = get_ipython()
+        shell = ipython.kernel.shell
+        return shell
+
     def compute_tokens(self, messages):
         """
         Compute the #of tokens for the messages.
@@ -61,7 +70,7 @@ class OCIGenaiMagics(Magics):
         for message in messages:
             # Estrarre il content dal messaggio, gestendo i diversi tipi di messaggi
             if hasattr(message, "content"):
-                content = message.content  # SystemMessage, HumanMessage, AIMessage
+                content = message.content
             else:
                 content = str(message)
 
@@ -85,9 +94,15 @@ class OCIGenaiMagics(Magics):
         """
         all_chunks = ""
 
+        # Crea un'area dinamica per lo streaming
+        display_handle = display(Markdown("```\n\n```"), display_id=True)
+
         for chunk in _ai_response:
-            print(chunk.content, end="", flush=True)
-            all_chunks += chunk.content
+            content = chunk.content
+            if content:
+                all_chunks += content  # Accumula i chunk
+                # update visible content
+                display_handle.update(Markdown(all_chunks))
 
         # return the entire result to be stored in history
         return all_chunks
@@ -120,6 +135,36 @@ class OCIGenaiMagics(Magics):
         # save in history input and output
         self.history.append(HumanMessage(content=last_request))
         self.history.append(AIMessage(content=all_text))
+
+    def handle_input_code(self, messages, last_request):
+        """
+        Process input from the user to generate code and dynamically update a new cell.
+        """
+        print("Generating code...")
+
+        llm = get_llm()
+
+        time_start = time()
+
+        ai_response = llm.invoke(messages)
+
+        _code = remove_triple_backtics(ai_response.content)
+
+        # to create a new cell with the code generated
+        shell = self.get_cell_manager()
+        shell.set_next_input(_code, replace=False)
+
+        # update stats
+        self.genai_requests += 1
+        self.genai_total_time += time() - time_start
+        self.tokens_input += self.compute_tokens(messages)
+        self.tokens_output += self.compute_tokens(
+            [AIMessage(content=ai_response.content)]
+        )
+
+        # Salva nella cronologia
+        self.history.append(HumanMessage(content=last_request))
+        self.history.append(AIMessage(content=_code))
 
     @line_magic
     def clear_history(self, line):
@@ -165,8 +210,8 @@ class OCIGenaiMagics(Magics):
         # we send separately line to save in history user request
         self.handle_input(messages, line)
 
-    @line_magic
-    def ask_code(self, line):
+    @cell_magic
+    def ask_code(self, line, cell):
         """
         Request code generation from the AI model based on the current context and user input.
 
@@ -174,34 +219,36 @@ class OCIGenaiMagics(Magics):
             line (str): The user's request for code.
         """
         # get the variables in session
-        context = get_context(self.shell.user_ns, line)
+        context = get_context(self.shell.user_ns, cell)
         # build input to the model
         messages = [
             SystemMessage(content=PROMPT_ASK_CODE),
             *self.history[-MAX_MSGS_IN_HISTORY:],
-            HumanMessage(content=f"Context: {context}\n\n{line}"),
+            HumanMessage(content=f"Context: {context}\n\n{cell}"),
         ]
         # send the messages to the model and print the response
-        self.handle_input(messages, line)
+        self.handle_input_code(messages, cell)
 
-    @line_magic
-    def ask_data(self, line):
+    @cell_magic
+    def ask_data(self, line, cell):
         """
         Request data analysis from the AI model based on the current context and user input.
 
         Args:
             line (str): The user's request for data analysis.
         """
-        context = get_context(self.shell.user_ns, line)
+        context = get_context(self.shell.user_ns, cell)
+
+        # print(f"\nContext: {context}\n\n")
 
         # add the context
         messages = [
             SystemMessage(content=PROMPT_ASK_DATA),
             *self.history[-MAX_MSGS_IN_HISTORY:],
-            HumanMessage(content=f"Context: {context}\n\n{line}"),
+            HumanMessage(content=f"Context: {context}\n\n{cell}"),
         ]
         # send the messages to the model and print the response
-        self.handle_input(messages, line)
+        self.handle_input(messages, cell)
 
     @line_magic
     def show_variables(self, line):
@@ -245,9 +292,16 @@ class OCIGenaiMagics(Magics):
         print("* Total requests: ", self.genai_requests)
         print("* Total input tokens: ", self.tokens_input)
         print("* Total output tokens: ", self.tokens_output)
-        print(
-            "* Avg time (sec.): ", round(self.genai_total_time / self.genai_requests, 1)
-        )
+
+        if self.genai_requests > 0:
+            print(
+                "* Avg input tokens: ",
+                round(self.tokens_input / self.genai_requests, 1),
+            )
+            print(
+                "* Avg output tokens: ",
+                round(self.tokens_output / self.genai_requests, 1),
+            )
 
 
 def load_ipython_extension(ipython):
