@@ -24,6 +24,7 @@ from config import (
     SERVICE_ENDPOINT,
     MAX_TOKENS,
     TEMPERATURE,
+    TOP_P,
     MAX_MSGS_IN_HISTORY,
     TOKENIZER,
 )
@@ -291,6 +292,7 @@ class OCIGenaiMagics(Magics):
         print("* Model: ", MODEL_ID)
         print("* Endpoint: ", SERVICE_ENDPOINT)
         print("* Temperature: ", TEMPERATURE)
+        print("* Top_p: ", TOP_P)
         print("* Max_tokens: ", MAX_TOKENS)
 
     @line_magic

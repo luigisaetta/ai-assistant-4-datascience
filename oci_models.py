@@ -10,6 +10,7 @@ from config import (
     SERVICE_ENDPOINT,
     MAX_TOKENS,
     TEMPERATURE,
+    TOP_P,
     COMPARTMENT_ID,
 )
 
@@ -27,6 +28,7 @@ def get_llm():
         service_endpoint=SERVICE_ENDPOINT,
         compartment_id=COMPARTMENT_ID,
         is_stream=True,
-        model_kwargs={"temperature": TEMPERATURE, "max_tokens": MAX_TOKENS},
+        model_kwargs={"temperature": TEMPERATURE, "max_tokens": MAX_TOKENS,
+                      "top_p": TOP_P},
     )
     return llm

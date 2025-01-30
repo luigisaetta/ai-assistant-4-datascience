@@ -10,6 +10,7 @@ SERVICE_ENDPOINT = "https://inference.generativeai.eu-frankfurt-1.oci.oracleclou
 
 TEMPERATURE = 0.1
 MAX_TOKENS = 1024
+TOP_P = 0.9
 
 # OCI general
 COMPARTMENT_ID = "ocid1.compartment.oc1..aaaaaaaaushuwb2evpuf7rcpl4r7ugmqoe7ekmaiik3ra3m7gec3d234eknq"
