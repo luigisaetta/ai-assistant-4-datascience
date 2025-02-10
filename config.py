@@ -3,7 +3,8 @@ OCI models configuration
 """
 
 # MODEL_ID = "cohere.command-r-plus-08-2024"
-MODEL_ID = "meta.llama-3.1-70b-instruct"
+# updated 10/02/2025
+MODEL_ID = "meta.llama-3.3-70b-instruct"
 
 AUTH = "API_KEY"
 SERVICE_ENDPOINT = "https://inference.generativeai.eu-frankfurt-1.oci.oraclecloud.com"

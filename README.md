@@ -8,6 +8,8 @@ This repository contains the code for an AI Assistant integrated in a Jupyter No
 * You can ask to analyze, for example, a dataset/dataframe loaded
 * You can ask for the code to make some processing, for example to train a ML model
 
+updated:
+* 20/02/2025: tested with Llama 3.3 70B, shows clear improvements in code generation
 ## Usage
 It can be plugged-in by simply loading an IPython extension
 
