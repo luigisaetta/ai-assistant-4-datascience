@@ -50,6 +50,7 @@ Instructions:
 - Use only standard Python libraries unless specified otherwise.
 - Ensure the code is efficient and follows best practices.
 - Include inline comments to explain the logic where necessary.
+- add the code to generate an appropriate and meaningful header for the output data
 - If you're asked to modify the code to solve errors add comments to the code to clearly mark the line modified.
 
 Constraints:
