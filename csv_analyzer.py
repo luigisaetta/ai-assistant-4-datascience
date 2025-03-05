@@ -79,6 +79,10 @@ def exec_code(_df, code):
     # Otteniamo l'output catturato come stringa
     captured_output = output_capture.getvalue()
 
+    if DEBUG:
+        print("Output: ")
+        print(captured_output)
+        print("")
     return captured_output
 
 
@@ -125,11 +129,13 @@ def process_request(f_name, question):
 #
 # Main
 #
-F_NAME = "travel_hospitality.csv"
+# F_NAME = "travel_hospitality.csv"
+F_NAME = "calendar.csv"
 
-QUESTION = """Show me the list of restaurants in London with rating > 3.5,
-display the output in a nicely formatted table"""
+#QUESTION = """Show me the list of restaurants in London with rating > 3.5,
+#display the output in a nicely formatted table"""
 # QUESTION = "give me the Name of restaurant in New Your that Fabricio has recommended"
+QUESTION = "Show me the first 5 workshop where Jane is organizer or required, with all the possible details including required attendees"
 
 print(process_request(F_NAME, QUESTION))
 print("")
